@@ -46,18 +46,20 @@ void probar_insertar_varios_elementos(){
 void probar_insertar_en_posicion(){
 	lista_t* una_lista = lista_crear();
 	int un_numero = 5, otro_numero = 10, un_numero_mas = 15;
-	char una_letra = 'f', otra_letra = 'k';
+	char una_letra = 'f', otra_letra = 'k', otra_letra_mas = 'r';
 	lista_insertar(una_lista, &un_numero);
 	lista_insertar(una_lista, &otro_numero);
 	lista_insertar(una_lista, &un_numero_mas);
 
-	lista_insertar_en_posicion(una_lista, &otra_letra, 0);
-	pa2m_afirmar(lista_elemento_en_posicion(una_lista, 0) == &otra_letra, "Puedo insertar un elemento en la posicion 0");
-
 	lista_insertar_en_posicion(una_lista, &una_letra, 2);
 	pa2m_afirmar(lista_elemento_en_posicion(una_lista, 2) == &una_letra, "Puedo insertar un elemento en la posicion 2");
 
+	lista_insertar_en_posicion(una_lista, &otra_letra, 0);
+	pa2m_afirmar(lista_elemento_en_posicion(una_lista, 0) == &otra_letra, "Puedo insertar un elemento en la posicion 0");
+	pa2m_afirmar(una_lista->nodo_inicio->elemento == &otra_letra, "El nodo_inicio apunta al nuevo elemento");
 
+	lista_insertar_en_posicion(una_lista, &otra_letra_mas, 1);
+	pa2m_afirmar(lista_elemento_en_posicion(una_lista, 1) == &otra_letra_mas, "Puedo insertar un elemento en la posicion 1");
 
 
 	lista_destruir(una_lista);
@@ -70,6 +72,7 @@ void probar_devolver_elementos(){
 	lista_insertar(una_lista, &otro_numero);
 	lista_insertar(una_lista, &un_numero_mas);
 
+	pa2m_afirmar(primer_elemento(lista) == &un_numero, "Puedo devolver el primer elemento");
 	pa2m_afirmar(lista_elemento_en_posicion(una_lista, 0) == &un_numero, "Puedo devolver el elemento en la posicion 0");
 	pa2m_afirmar(lista_elemento_en_posicion(una_lista, 1) == &otro_numero, "Puedo devolver el elemento en la posicion 1");
 	pa2m_afirmar(lista_ultimo(una_lista) == una_lista->nodo_fin->elemento, "Puedo devolver el ultimo elemento de la lista");
@@ -105,6 +108,55 @@ void probar_iterador(){
 	
 }
 
+void probar_borrar(){
+	lista_t* una_lista = lista_crear();
+	int un_numero = 5, otro_numero = 10, un_numero_mas = 15;
+
+	pa2m_afirmar(lista_borrar(una_lista) == -1, "No puedo borrar elementos de una lista vacía");
+	lista_insertar(una_lista, &un_numero);
+	lista_insertar(una_lista, &otro_numero);
+	lista_insertar(una_lista, &un_numero_mas);
+
+	lista_borrar(una_lista);
+	pa2m_afirmar(una_lista->nodo_fin->elemento != &un_numero_mas, "Liberé el ultimo elemento");
+	pa2m_afirmar(una_lista->nodo_fin->elemento == &otro_numero, "Ahora el anteultimo elemento es el ultimo");
+	pa2m_afirmar(una_lista->cantidad == 2, "La lista tiene la cantidad correcta de elementos");
+
+	lista_destruir(una_lista);
+}
+
+void probar_borrar_en_posicion(){
+	lista_t* una_lista = lista_crear();
+
+	pa2m_afirmar(lista_borrar_de_posicion(una_lista, 4) == -1, "No puedo borrar elementos de una lista vacia");
+
+	int un_numero = 5, otro_numero = 10, un_numero_mas = 15;
+	lista_insertar(una_lista, &un_numero);
+	lista_insertar(una_lista, &otro_numero);
+	lista_insertar(una_lista, &un_numero_mas);
+
+	lista_borrar_de_posicion(una_lista, 2);
+	pa2m_afirmar(lista_elemento_en_posicion(una_lista, 2) != &un_numero_mas, "Puedo borrar un elemento en la posicion 2");
+	lista_borrar_de_posicion(una_lista, 0);
+	pa2m_afirmar(lista_elemento_en_posicion(una_lista, 0) != &un_numero, "Puedo borrar un elemento en la posicion 0");
+
+	
+	lista_destruir(una_lista);
+}
+
+void probar_pila(){
+	lista_t* una_lista = lista_crear();
+	int un_numero = 5, otro_numero = 10, un_numero_mas = 15;
+	lista_apilar(una_lista, &un_numero);
+	lista_apilar(una_lista, &otro_numero);
+	lista_apilar(una_lista, &un_numero_mas);
+
+	pa2m_afirmar(lista->nodo_fin == &un_numero_mas, "Puedo apilar un elemento");
+	lista_desapilar(una_lista);
+	pa2m_afirmar(lista->nodo_fin != &un_numero_mas, "Puedo desapilar un elemento");
+	lista_destruir(una_lista);
+}
+
 int main(){
 	pa2m_nuevo_grupo("CREAR LISTA");
 	probar_creacion_lista();
@@ -121,5 +173,17 @@ int main(){
 
 	pa2m_nuevo_grupo("CREAR ITERADOR");
 	probar_iterador();
+
+	pa2m_nuevo_grupo("BORRAR ELEMENTOS");
+	probar_borrar();
+
+	pa2m_nuevo_grupo("BORRAR ELEMENTOS DE POSICION");
+	probar_borrar_en_posicion();
+
+	pa2m_nuevo_grupo("PILA");
+	probar_pila();
+
+	//pa2m_nuevo_grupo("COLA");
+	//probar_cola();
 	return 0;
 }

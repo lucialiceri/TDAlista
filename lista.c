@@ -79,14 +79,6 @@ lista_iterador_t* lista_iterador_crear(lista_t* lista){
 	return iterador;
 }
 
-void lista_iterador_destruir(lista_iterador_t* iterador){
-	free(iterador);
-}
-
-int lista_borrar(lista_t* lista){
-	return 0;
-}
-
 bool lista_iterador_tiene_siguiente(lista_iterador_t* iterador){
 	if(iterador->corriente->siguiente != NULL) 
 		return true;
@@ -102,17 +94,31 @@ bool lista_iterador_avanzar(lista_iterador_t* iterador){
 	return false;
 }
 
+int lista_borrar(lista_t* lista){
+	if((!lista) || (lista->cantidad == 0)) return -1;
+	nodo_t* nodo_aux = lista->nodo_fin;
+	lista_iterador_t* it = lista_iterador_crear(lista);
+	int contador = 2;
+	while((lista_iterador_tiene_siguiente(it)) && (contador < lista->cantidad)){
+		lista_iterador_avanzar(it);
+		contador++;
+	}
+	lista->nodo_fin = it->corriente;
+	lista->cantidad--;
+	free(nodo_aux);
+	lista_iterador_destruir(it);
+	return 0;
+}
+
+void lista_iterador_destruir(lista_iterador_t* iterador){
+	free(iterador);
+}
+
 void* lista_iterador_elemento_actual(lista_iterador_t* iterador){
 	if(iterador->corriente->elemento == NULL) return NULL;
 	return iterador->corriente->elemento;
 }
 
-/*
- * Inserta un elemento en la posicion indicada, donde 0 es insertar
- * como primer elemento y 1 es insertar luego del primer elemento.  
- * En caso de no existir la posicion indicada, lo inserta al final.
- * Devuelve 0 si pudo insertar o -1 si no pudo.
- */
 int lista_insertar_en_posicion(lista_t* lista, void* elemento, size_t posicion){
 	if(!lista) return -1;
 
@@ -122,18 +128,26 @@ int lista_insertar_en_posicion(lista_t* lista, void* elemento, size_t posicion){
 		return -1;
 	}
 
-	size_t contador = 0;
 	lista_iterador_t* it = lista_iterador_crear(lista);
-	while(lista_iterador_tiene_siguiente(it) && (contador < posicion - 1)){
-		lista_iterador_avanzar(it);
-		contador++;
-	}
-
-	
 	nodo_t* nodo_nuevo = calloc(1, sizeof(nodo_t));
 	if(!nodo_nuevo){
 		free(nodo_nuevo);
 		return -1;
+	}
+	if(posicion == 0){
+		lista->nodo_inicio = nodo_nuevo;
+		lista->nodo_inicio->elemento = elemento;
+		lista->nodo_inicio->siguiente = it->corriente;
+		lista->cantidad++;
+		lista_iterador_destruir(it);
+		return 0;
+	}
+
+	size_t contador = 0;
+	
+	while((lista_iterador_tiene_siguiente(it)) && (contador < posicion - 1)){
+		lista_iterador_avanzar(it);
+		contador++;
 	}
 
 	nodo_t* auxiliar_siguiente = it->corriente->siguiente;
@@ -141,7 +155,6 @@ int lista_insertar_en_posicion(lista_t* lista, void* elemento, size_t posicion){
 	lista_iterador_avanzar(it);
 	it->corriente->elemento = elemento;
 	it->corriente->siguiente = auxiliar_siguiente;
-	auxiliar_siguiente = NULL;
 	lista->cantidad++;
 
 	lista_iterador_destruir(it);
@@ -156,16 +169,36 @@ int lista_insertar_en_posicion(lista_t* lista, void* elemento, size_t posicion){
  * elemento.  
  * Devuelve 0 si pudo eliminar o -1 si no pudo.
  */
-int lista_borrar_de_posicion(lista_t* lista, size_t posicion);
+int lista_borrar_de_posicion(lista_t* lista, size_t posicion){
+	if((!lista) || (lista->cantidad == 0)) return -1;
 
-/*
- * Devuelve el elemento en la posicion indicada, donde 0 es el primer
- * elemento.
- *
- * Si no existe dicha posicion devuelve NULL.
- */
+	if(posicion == (lista->cantidad) -1){
+		lista_borrar(lista);
+		return 0;
+	}
+	lista_iterador_t* it = lista_iterador_crear(lista);
+	nodo_t* nodo_aux = it->corriente->siguiente;
+	if(posicion == 0){
+		lista->nodo_inicio = nodo_aux;
+		free(it->corriente);
+		lista_iterador_destruir(it);
+		return 0;
+	}
+	int contador = 1;
+	while((lista_iterador_tiene_siguiente(it)) && (contador < posicion)){
+		lista_iterador_avanzar(it);
+		contador++;
+	}
+	
+	it->corriente->siguiente = nodo_aux->siguiente;
+	free(nodo_aux);
+	lista_iterador_destruir(it);
+	return 0;
+}
+
+
 void* lista_elemento_en_posicion(lista_t* lista, size_t posicion){
-	if((!lista) || (lista->cantidad == 0) || (lista->cantidad < posicion)) return NULL;
+	if((!lista) || (lista->cantidad == 0) || (lista->cantidad <= posicion)) return NULL;
 
 	size_t contador = 0;
 	lista_iterador_t* it = lista_iterador_crear(lista);
@@ -195,5 +228,80 @@ void lista_destruir(lista_t* lista){
 	}
 }
 
+/* 
+ * Apila un elemento.
+ * Devuelve 0 si pudo o -1 en caso contrario.
+ */
+int lista_apilar(lista_t* lista, void* elemento){
+	if(!lista) return -1;
+	nodo_t* nodo_nuevo = calloc(1, sizeof(nodo_t));
+	if(!nodo_nuevo){
+		free(nodo_nuevo);
+		return -1;
+	}
+	lista->nodo_fin->siguiente = nodo_nuevo;
+	nodo_nuevo->elemento = elemento;
+	lista->nodo_fin = nodo_nuevo;
+	lista->cantidad++;
+	return 0;
+}
 
+/* 
+ * Desapila un elemento.
+ * Devuelve 0 si pudo desapilar o -1 si no pudo.
+ */
+int lista_desapilar(lista_t* lista){
+	if(!lista) return -1;
+	lista_borrar(lista);
+	return 0;
+}
+
+/*
+ * Devuelve el elemento en el tope de la pila o NULL
+ * en caso de estar vacía.
+ */
+void* lista_tope(lista_t* lista){
+	if(!lista) return NULL;
+	return lista->nodo_fin;
+}
+
+/* 
+ * Encola un elemento.
+ * Devuelve 0 si pudo encolar o -1 si no pudo.
+ */
+int lista_encolar(lista_t* lista, void* elemento){
+	if(!lista) return -1;
+	int devolver = lista_insertar(lista, elemento);
+	if(devolver != 0) return -1;
+	return 0;
+}
+
+/* 
+ * Desencola un elemento.
+ * Devuelve 0 si pudo desencolar o -1 si no pudo.
+ */
+int lista_desencolar(lista_t* lista){
+	if(!lista) return -1;
+	int devolver = lista_borrar_de_posicion(lista, 0);
+	if(devolver != 0) return -1;
+	return 0;
+}
+
+/*
+ * Devuelve el primer elemento de la cola o NULL en caso de estar
+ * vacía.
+ */
+void* lista_primero(lista_t* lista){
+	if((!lista) || (lista_vacia(lista) == true)) return NULL;
+	return lista->nodo_inicio;
+}
+
+/*
+ * Iterador interno. Recorre la lista e invoca la funcion con cada elemento de
+ * la misma. Dicha función puede devolver true si se deben seguir recorriendo
+ * elementos o false si se debe dejar de iterar elementos.
+ *
+ * La función retorna la cantidad de elementos iterados o 0 en caso de error.
+ */
+size_t lista_con_cada_elemento(lista_t* lista, bool (*funcion)(void*, void*), void *contexto);
 

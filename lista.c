@@ -234,16 +234,7 @@ void lista_destruir(lista_t* lista){
  */
 int lista_apilar(lista_t* lista, void* elemento){
 	if(!lista) return -1;
-	nodo_t* nodo_nuevo = calloc(1, sizeof(nodo_t));
-	if(!nodo_nuevo){
-		free(nodo_nuevo);
-		return -1;
-	}
-	lista->nodo_fin->siguiente = nodo_nuevo;
-	nodo_nuevo->elemento = elemento;
-	lista->nodo_fin = nodo_nuevo;
-	lista->cantidad++;
-	return 0;
+	return lista_insertar(lista, elemento);
 }
 
 /* 
@@ -293,7 +284,7 @@ int lista_desencolar(lista_t* lista){
  */
 void* lista_primero(lista_t* lista){
 	if((!lista) || (lista_vacia(lista) == true)) return NULL;
-	return lista->nodo_inicio;
+	return lista->nodo_inicio->elemento;
 }
 
 /*
@@ -303,5 +294,6 @@ void* lista_primero(lista_t* lista){
  *
  * La función retorna la cantidad de elementos iterados o 0 en caso de error.
  */
-size_t lista_con_cada_elemento(lista_t* lista, bool (*funcion)(void*, void*), void *contexto);
-
+size_t lista_con_cada_elemento(lista_t* lista, bool (*funcion)(void*, void*), void *contexto){
+	return 0;
+}

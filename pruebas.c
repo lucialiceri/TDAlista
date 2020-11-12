@@ -72,7 +72,7 @@ void probar_devolver_elementos(){
 	lista_insertar(una_lista, &otro_numero);
 	lista_insertar(una_lista, &un_numero_mas);
 
-	pa2m_afirmar(primer_elemento(lista) == &un_numero, "Puedo devolver el primer elemento");
+	pa2m_afirmar(lista_primero(una_lista) == &un_numero, "Puedo devolver el primer elemento");
 	pa2m_afirmar(lista_elemento_en_posicion(una_lista, 0) == &un_numero, "Puedo devolver el elemento en la posicion 0");
 	pa2m_afirmar(lista_elemento_en_posicion(una_lista, 1) == &otro_numero, "Puedo devolver el elemento en la posicion 1");
 	pa2m_afirmar(lista_ultimo(una_lista) == una_lista->nodo_fin->elemento, "Puedo devolver el ultimo elemento de la lista");
@@ -150,10 +150,29 @@ void probar_pila(){
 	lista_apilar(una_lista, &un_numero);
 	lista_apilar(una_lista, &otro_numero);
 	lista_apilar(una_lista, &un_numero_mas);
+	lista_t* listita = NULL;
 
-	pa2m_afirmar(lista->nodo_fin == &un_numero_mas, "Puedo apilar un elemento");
+	pa2m_afirmar(lista_apilar(listita, &un_numero) == -1, "No puedo apilar una lista inexistente");
+	pa2m_afirmar(una_lista->nodo_fin->elemento == &un_numero_mas, "Puedo apilar un elemento");
 	lista_desapilar(una_lista);
-	pa2m_afirmar(lista->nodo_fin != &un_numero_mas, "Puedo desapilar un elemento");
+	pa2m_afirmar(una_lista->nodo_fin->elemento != &un_numero_mas, "Puedo desapilar un elemento");
+	lista_destruir(una_lista);
+}
+
+void probar_cola(){
+	lista_t* una_lista = lista_crear();
+	int un_numero = 5, otro_numero = 10, un_numero_mas = 15;
+	lista_encolar(una_lista, &un_numero);
+	lista_encolar(una_lista, &otro_numero);
+	lista_encolar(una_lista, &un_numero_mas);
+	lista_t* listita = NULL;
+
+	pa2m_afirmar(lista_encolar(listita, &un_numero) == -1, "No puedo encolar un elemento en una lista inexistente");
+	pa2m_afirmar(una_lista->nodo_fin->elemento == &un_numero_mas, "Puedo encolar un elemento al final");
+	lista_desencolar(una_lista);
+	pa2m_afirmar(una_lista->nodo_inicio->elemento != &un_numero, "Puedo desencolar un elemento");
+	pa2m_afirmar(una_lista->nodo_inicio->elemento == &otro_numero, "Ahora el primer elemento es el que era el segundo");
+
 	lista_destruir(una_lista);
 }
 
@@ -183,7 +202,7 @@ int main(){
 	pa2m_nuevo_grupo("PILA");
 	probar_pila();
 
-	//pa2m_nuevo_grupo("COLA");
-	//probar_cola();
+	pa2m_nuevo_grupo("COLA");
+	probar_cola();
 	return 0;
 }

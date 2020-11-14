@@ -176,6 +176,25 @@ void probar_cola(){
 	lista_destruir(una_lista);
 }
 
+bool mostrar_elemento(void* elemento, void* tope){
+	printf("%i\n", *(int*)elemento);
+	//if(*(int*)elemento == *tope) return false;
+	return true;
+}
+
+void probar_iterador_interno(){
+	lista_t* una_lista = lista_crear();
+	int un_numero = 5, otro_numero = 10, un_numero_mas = 15;
+	lista_insertar(una_lista, &un_numero);
+	lista_insertar(una_lista, &otro_numero);
+	lista_insertar(una_lista, &un_numero_mas);
+	size_t cant_iterada;
+	cant_iterada = lista_con_cada_elemento(una_lista, mostrar_elemento, NULL);
+
+	pa2m_afirmar(cant_iterada == 2, "Se iteran todos los elementos");
+	lista_destruir(una_lista);
+}
+
 int main(){
 	pa2m_nuevo_grupo("CREAR LISTA");
 	probar_creacion_lista();
@@ -204,5 +223,7 @@ int main(){
 
 	pa2m_nuevo_grupo("COLA");
 	probar_cola();
+
+	probar_iterador_interno();
 	return 0;
 }

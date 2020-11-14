@@ -295,5 +295,14 @@ void* lista_primero(lista_t* lista){
  * La función retorna la cantidad de elementos iterados o 0 en caso de error.
  */
 size_t lista_con_cada_elemento(lista_t* lista, bool (*funcion)(void*, void*), void *contexto){
-	return 0;
+	if((!lista) || lista_vacia(lista)) return 0;
+
+	lista_iterador_t* it = lista_iterador_crear(lista);
+	size_t contador = 0;
+	while((funcion(it->corriente->elemento, contexto)) && (lista_iterador_tiene_siguiente(it))){
+		lista_iterador_avanzar(it);
+		contador++;
+	}
+	lista_iterador_destruir(it);
+	return contador;
 }
